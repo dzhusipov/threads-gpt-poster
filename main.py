@@ -145,7 +145,7 @@ def process_image_from_url(image_url):
             image_format = 'PNG'
 
         # Save the image locally in the IMAGE_FOLDER
-        filename = f"image_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{image_format.lower()}"
+        filename = f"image_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.{image_format.lower()}"
         filepath = os.path.join(IMAGE_FOLDER, filename)
         image.save(filepath, format=image_format)
         logging.info('Image saved locally as: %s', filepath)
@@ -229,7 +229,14 @@ async def get_image(filename: str):
     else:
         return Response(content="Image not found", status_code=404)
 
-# Use the startup event to run code after the server starts
+@app.get("/job")
+async def run_job_endpoint():
+    # Run the job in an executor to avoid blocking the event loop
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, job)
+    
+    return {"message": "Job executed successfully"}
+
 # Use the startup event to run code after the server starts
 @app.on_event("startup")
 async def startup_event():
